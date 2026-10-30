@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fura-Fila · Cantina CESAR</title>
+<style>
+  :root {
+    --laranja: #ff6b2c; --laranja-escuro: #e5541a; --laranja-claro: #fff0e8;
+    --tinta: #1d1b22; --cinza: #6f6b78; --linha: #ece7e2; --fundo: #faf6f1;
+    --card: #ffffff; --verde: #19a463; --verde-claro: #e6f7ee; --amarelo: #f5a623;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #e9e4de; color: var(--tinta); }
+  .app { max-width: 430px; min-height: 100vh; margin: 0 auto; background: var(--fundo); position: relative; padding-bottom: 150px; }
+  header { padding: 22px 20px 18px; background: var(--tinta); color: #fff; border-radius: 0 0 26px 26px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px; }
+  .logo .marca { width: 38px; height: 38px; border-radius: 12px; background: var(--laranja); display: grid; place-items: center; font-size: 20px; }
+  .logo small { display: block; font-size: 12px; font-weight: 500; color: #b9b5c2; letter-spacing: 0; }
+  .relogio { margin-top: 16px; display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,.08); padding: 12px 14px; border-radius: 14px; font-size: 14px; color: #e5e2ea; }
+  .relogio b { color: #fff; font-size: 18px; }
+  main { padding: 18px 16px; }
+  h2 { font-size: 19px; margin: 6px 4px 12px; }
+  .sub { color: var(--cinza); font-size: 14px; margin: -6px 4px 14px; }
+  .item { display: flex; align-items: center; gap: 12px; background: var(--card); border-radius: 16px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--linha); }
+  .item .foto { width: 52px; height: 52px; border-radius: 14px; background: var(--laranja-claro); display: grid; place-items: center; font-size: 28px; flex-shrink: 0; }
+  .item .info { flex: 1; }
+  .item .nome { font-weight: 650; font-size: 15px; }
+  .item .preco { color: var(--cinza); font-size: 14px; margin-top: 2px; }
+  .qtd { display: flex; align-items: center; gap: 10px; }
+  .qtd button { width: 32px; height: 32px; border-radius: 10px; border: none; font-size: 18px; font-weight: 700; cursor: pointer; background: var(--laranja-claro); color: var(--laranja-escuro); }
+  .qtd button.mais { background: var(--laranja); color: #fff; }
+  .qtd span { min-width: 16px; text-align: center; font-weight: 700; }
+  input { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--linha); font-size: 16px; background: #fff; color: var(--tinta); }
+  input:focus { outline: 2px solid var(--laranja); border-color: transparent; }
+  label { font-size: 13px; font-weight: 600; color: var(--cinza); display: block; margin: 16px 4px 6px; }
+  .barra { position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; padding: 12px 16px; background: linear-gradient(transparent, var(--fundo) 30%); }
+  .botao { width: 100%; padding: 16px; border: none; border-radius: 16px; background: var(--laranja); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .botao:disabled { background: #d7d1cb; cursor: default; }
+  .botao.centro { justify-content: center; }
+  .botao.verde { background: var(--verde); }
+  .card { background: var(--card); border-radius: 18px; padding: 16px; border: 1px solid var(--linha); margin-bottom: 12px; }
+  .linha { display: flex; justify-content: space-between; font-size: 15px; padding: 5px 0; }
+  .linha.total { font-weight: 800; font-size: 17px; border-top: 1px dashed var(--linha); margin-top: 8px; padding-top: 12px; }
+  .opcao { display: flex; align-items: center; gap: 12px; background: var(--card); border: 2px solid var(--linha); border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; }
+  .opcao.sel { border-color: var(--laranja); background: var(--laranja-claro); }
+  .opcao .ic { font-size: 24px; }
+  .opcao .t { flex: 1; font-weight: 650; }
+  .opcao .t small { display: block; font-weight: 500; color: var(--cinza); font-size: 13px; }
+  .selo { background: var(--verde); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 8px; }
+  .erro { background: #fdecec; color: #b42318; padding: 12px; border-radius: 12px; font-size: 14px; margin-top: 12px; display: none; }
+  .passos { display: flex; justify-content: space-between; margin: 10px 4px 20px; position: relative; }
+  .passos::before { content: ""; position: absolute; top: 17px; left: 30px; right: 30px; height: 4px; background: var(--linha); border-radius: 2px; }
+  .passo { text-align: center; font-size: 12px; color: var(--cinza); width: 80px; position: relative; }
+  .passo .bola { width: 38px; height: 38px; border-radius: 50%; background: var(--linha); margin: 0 auto 6px; display: grid; place-items: center; font-size: 17px; }
+  .passo .bola { opacity: .4; }
+  .passo.feito .bola { background: var(--laranja); opacity: 1; }
+  .passo.feito { color: var(--tinta); font-weight: 650; }
+  .grande { text-align: center; padding: 26px 18px; border-radius: 22px; margin-bottom: 14px; }
+  .grande .emoji { font-size: 54px; }
+  .grande h3 { font-size: 22px; margin: 10px 0 6px; }
+  .grande p { color: var(--cinza); font-size: 15px; }
+  .grande.preparo { background: #fff6e5; }
+  .grande.pronto { background: var(--verde-claro); border: 2px solid var(--verde); }
+  .grande.pronto h3 { color: var(--verde); }
+  .senha { font-size: 13px; color: var(--cinza); margin-top: 12px; }
+  .senha b { font-size: 26px; color: var(--tinta); display: block; }
+  .ped { display: flex; align-items: center; gap: 12px; }
+  .ped .num { width: 46px; height: 46px; border-radius: 14px; background: var(--tinta); color: #fff; display: grid; place-items: center; font-weight: 800; }
+  .ped .det { flex: 1; font-size: 14px; }
+  .ped .det b { font-size: 15px; }
+  .ped .det small { color: var(--cinza); display: block; margin-top: 2px; }
+  .tag { font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 8px; display: inline-block; margin-top: 6px; }
+  .tag.aguardando { background: #eee; color: #666; }
+  .tag.preparo { background: #fff1d6; color: #a96800; }
+  .tag.pronto { background: var(--verde-claro); color: var(--verde); }
+  .mini { padding: 10px 12px; border-radius: 12px; border: none; background: var(--verde); color: #fff; font-weight: 700; cursor: pointer; font-size: 13px; }
+  .vazio { text-align: center; color: var(--cinza); padding: 40px 10px; font-size: 15px; }
+  nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: #fff; border-top: 1px solid var(--linha); display: flex; height: 64px; }
+  nav button { flex: 1; border: none; background: none; font-size: 12px; color: var(--cinza); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+  nav button span { font-size: 20px; }
+  nav button.ativo { color: var(--laranja); font-weight: 700; }
+  .tela { display: none; }
+  .tela.ativa { display: block; }
+  .pulso { animation: pulso 1.6s ease-in-out infinite; }
+  @keyframes pulso { 50% { transform: scale(1.08); } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo"><div class="marca">🏃</div><div>Fura-Fila<small>Cantina CESAR</small></div></div>
+    <div class="relogio">⏱️ <div>Intervalo de <b>15 min</b>? Peça antes!</div></div>
+  </header>
+
+  <main>
+    <!-- CARDAPIO -->
+    <section class="tela ativa" id="tela-cardapio">
+      <h2>Cardápio do dia</h2>
+      <p class="sub">Escolha seu lanche e pague antes do intervalo.</p>
+      <input id="nome" placeholder="Seu nome (para chamar no balcão)" autocomplete="off" style="margin-bottom:14px">
+      <div id="lista"></div>
+      <div class="erro" id="erro-pedido"></div>
+    </section>
+
+    <!-- PAGAMENTO -->
+    <section class="tela" id="tela-pagamento">
+      <h2>Pagamento</h2>
+      <div class="card" id="resumo"></div>
+      <h2>Como você quer pagar?</h2>
+      <div class="opcao" data-forma="pix"><div class="ic">⚡</div><div class="t">Pix<small>Aprovação na hora</small></div><div class="selo">-5%</div></div>
+      <div class="opcao" data-forma="cartao"><div class="ic">💳</div><div class="t">Cartão<small>Crédito ou débito</small></div></div>
+      <div class="opcao" data-forma="dinheiro"><div class="ic">💵</div><div class="t">Dinheiro<small>Paga no balcão, troco calculado</small></div></div>
+      <div id="campo-dinheiro" style="display:none">
+        <label for="entregue">Quanto você vai entregar?</label>
+        <input id="entregue" inputmode="decimal" placeholder="Ex.: 50,00">
+      </div>
+      <div class="erro" id="erro-pagamento"></div>
+    </section>
+
+    <!-- STATUS -->
+    <section class="tela" id="tela-status">
+      <div id="status-conteudo"><div class="vazio">Você ainda não fez nenhum pedido.</div></div>
+    </section>
+
+    <!-- CANTINA -->
+    <section class="tela" id="tela-cantina">
+      <h2>Painel da cantina</h2>
+      <p class="sub">Marque o pedido como pronto e o aluno é avisado.</p>
+      <div id="fila"></div>
+    </section>
+  </main>
+
+  <div class="barra" id="barra"><button class="botao" id="acao" disabled><span>Fazer pedido</span><span id="acao-valor">R$ 0,00</span></button></div>
+
+  <nav>
+    <button class="ativo" data-ir="cardapio"><span>🍽️</span>Cardápio</button>
+    <button data-ir="status"><span>🔔</span>Meu pedido</button>
+    <button data-ir="cantina"><span>👩‍🍳</span>Cantina</button>
+  </nav>
+</div>
+
+<script>
+  const brl = v => "R$ " + v.toFixed(2).replace(".", ",");
+  let cardapio = [], carrinho = {}, pedidoAtual = null, forma = null, telaAtual = "cardapio";
+
+  async function api(caminho, dados) {
+    const op = dados ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) } : {};
+    const r = await fetch(caminho, op);
+    return r.json();
+  }
+
+  function ir(tela) {
+    telaAtual = tela;
+    document.querySelectorAll(".tela").forEach(t => t.classList.toggle("ativa", t.id === "tela-" + tela));
+    document.querySelectorAll("nav button").forEach(b => b.classList.toggle("ativo", b.dataset.ir === tela || (tela === "pagamento" && b.dataset.ir === "cardapio")));
+    atualizarBarra();
+    if (tela === "cantina") carregarFila();
+    if (tela === "status") atualizarStatus();
+    window.scrollTo(0, 0);
+  }
+
+  function totalCarrinho() {
+    return cardapio.reduce((s, i) => s + (carrinho[i.id] || 0) * i.preco, 0);
+  }
+
+  function desenharCardapio() {
+    document.getElementById("lista").innerHTML = cardapio.map(i => `
+      <div class="item">
+        <div class="foto">${i.emoji}</div>
+        <div class="info"><div class="nome">${i.nome}</div><div class="preco">${brl(i.preco)}</div></div>
+        <div class="qtd">
+          ${carrinho[i.id] ? `<button onclick="mudar(${i.id},-1)">−</button><span>${carrinho[i.id]}</span>` : ""}
+          <button class="mais" onclick="mudar(${i.id},1)">+</button>
+        </div>
+      </div>`).join("");
+    atualizarBarra();
+  }
+
+  function mudar(id, d) {
+    carrinho[id] = Math.max(0, (carrinho[id] || 0) + d);
+    desenharCardapio();
+  }
+
+  function atualizarBarra() {
+    const barra = document.getElementById("barra"), botao = document.getElementById("acao");
+    const valor = document.getElementById("acao-valor");
+    barra.style.display = (telaAtual === "cardapio" || telaAtual === "pagamento") ? "block" : "none";
+    if (telaAtual === "cardapio") {
+      const t = totalCarrinho();
+      botao.firstElementChild.textContent = "Fazer pedido";
+      valor.textContent = brl(t);
+      botao.disabled = t === 0;
+    } else if (telaAtual === "pagamento" && pedidoAtual) {
+      const v = forma === "pix" ? pedidoAtual.total * 0.95 : pedidoAtual.total;
+      botao.firstElementChild.textContent = forma ? "Pagar" : "Escolha a forma";
+      valor.textContent = brl(v);
+      botao.disabled = !forma;
+    }
+  }
+
+  function mostrarErro(id, msg) {
+    const e = document.getElementById(id);
+    e.textContent = msg; e.style.display = msg ? "block" : "none";
+  }
+
+  document.getElementById("acao").onclick = async () => {
+    if (telaAtual === "cardapio") {
+      const itens = Object.entries(carrinho).filter(([, q]) => q > 0).map(([id, qtd]) => ({ id: Number(id), qtd }));
+      const r = await api("/api/pedido", { cliente: document.getElementById("nome").value, itens });
+      if (r.erro) return mostrarErro("erro-pedido", r.erro);
+      mostrarErro("erro-pedido", "");
+      pedidoAtual = r; forma = null;
+      document.querySelectorAll(".opcao").forEach(o => o.classList.remove("sel"));
+      document.getElementById("campo-dinheiro").style.display = "none";
+      desenharResumo();
+      ir("pagamento");
+    } else if (telaAtual === "pagamento") {
+      const r = await api("/api/pagar", { id: pedidoAtual.id, forma, entregue: document.getElementById("entregue").value });
+      if (r.erro) return mostrarErro("erro-pagamento", r.erro);
+      mostrarErro("erro-pagamento", "");
+      pedidoAtual = r.pedido; pedidoAtual.mensagem = r.mensagem;
+      carrinho = {}; desenharCardapio(); document.getElementById("nome").value = "";
+      ir("status");
+    }
+  };
+
+  function desenharResumo() {
+    const p = pedidoAtual;
+    document.getElementById("resumo").innerHTML =
+      `<div class="linha"><b>Pedido #${p.id}</b><span>${p.cliente}</span></div>` +
+      p.itens.map(i => `<div class="linha"><span>${i.qtd}x ${i.nome}</span><span>${brl(i.preco * i.qtd)}</span></div>`).join("") +
+      `<div class="linha total"><span>Total</span><span>${brl(p.total)}</span></div>`;
+  }
+
+  document.querySelectorAll(".opcao").forEach(o => o.onclick = () => {
+    forma = o.dataset.forma;
+    document.querySelectorAll(".opcao").forEach(x => x.classList.toggle("sel", x === o));
+    document.getElementById("campo-dinheiro").style.display = forma === "dinheiro" ? "block" : "none";
+    atualizarBarra();
+  });
+
+  async function atualizarStatus() {
+    if (!pedidoAtual) return;
+    const msg = pedidoAtual.mensagem;
+    const p = await api("/api/pedido?id=" + pedidoAtual.id);
+    if (p.erro) return;
+    pedidoAtual = p; pedidoAtual.mensagem = msg;
+    const pronto = p.status === "pronto para retirar", pago = p.status !== "aguardando pagamento";
+    const passos = [["🧾", "Pedido feito", true], ["👩‍🍳", "Em preparo", pago], ["✅", "Pronto", pronto]];
+    document.getElementById("status-conteudo").innerHTML = `
+      <h2>Meu pedido #${p.id}</h2>
+      <div class="passos">${passos.map(([e, t, f]) => `<div class="passo ${f ? "feito" : ""}"><div class="bola">${e}</div>${t}</div>`).join("")}</div>
+      ${pronto
+        ? `<div class="grande pronto"><div class="emoji pulso">🔔</div><h3>${p.cliente}, seu lanche está pronto!</h3><p>Pode buscar no balcão. Sem fila.</p><div class="senha">Senha<b>#${p.id}</b></div></div>`
+        : `<div class="grande preparo"><div class="emoji">👩‍🍳</div><h3>Em preparo</h3><p>A gente avisa aqui quando estiver pronto. Aproveite o intervalo!</p></div>`}
+      <div class="card">
+        ${p.itens.map(i => `<div class="linha"><span>${i.qtd}x ${i.nome}</span><span>${brl(i.preco * i.qtd)}</span></div>`).join("")}
+        <div class="linha total"><span>Pago com ${p.pagamento}</span><span>${brl(p.valor_pago)}</span></div>
+        ${p.troco !== null ? `<div class="linha"><span>Troco</span><span>${brl(p.troco)}</span></div>` : ""}
+      </div>
+      ${msg && !pronto ? `<p class="sub" style="margin-top:4px">✔ ${msg}</p>` : ""}`;
+  }
+
+  async function carregarFila() {
+    const lista = await api("/api/pedidos");
+    const pagos = lista.filter(p => p.status !== "aguardando pagamento");
+    document.getElementById("fila").innerHTML = pagos.length === 0
+      ? `<div class="vazio">Nenhum pedido pago ainda.</div>`
+      : pagos.map(p => {
+          const pronto = p.status === "pronto para retirar";
+          return `<div class="card ped">
+            <div class="num">#${p.id}</div>
+            <div class="det"><b>${p.cliente}</b><small>${p.itens.map(i => i.qtd + "x " + i.nome).join(", ")}</small>
+              <span class="tag ${pronto ? "pronto" : "preparo"}">${pronto ? "Pronto para retirar" : "Em preparo"}</span></div>
+            ${pronto ? "" : `<button class="mini" onclick="pronto(${p.id})">Pronto ✓</button>`}
+          </div>`;
+        }).join("");
+  }
+
+  async function pronto(id) {
+    await api("/api/pronto", { id });
+    carregarFila();
+  }
+
+  document.querySelectorAll("nav button").forEach(b => b.onclick = () => ir(b.dataset.ir));
+  setInterval(() => { if (telaAtual === "status") atualizarStatus(); if (telaAtual === "cantina") carregarFila(); }, 2000);
+
+  api("/api/cardapio").then(c => { cardapio = c; desenharCardapio(); });
+</script>
+</body>
+</html>
